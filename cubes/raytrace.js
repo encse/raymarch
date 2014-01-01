@@ -56,6 +56,8 @@ var raytrace =  (function(){
 		 
 		    gl.uniform2f(gl.getUniformLocation(program, 'uCanvasSize'), c.width, c.height);
 		  
+		    var ulocMatA = gl.getUniformLocation(program, 'matA');
+		    var ulocMatB = gl.getUniformLocation(program, 'matB');
 		    var ulocMatiA = gl.getUniformLocation(program, 'matiA');
 		    var ulocMatiB = gl.getUniformLocation(program, 'matiB');
 		
@@ -96,8 +98,8 @@ var raytrace =  (function(){
 			    //var TIME_FROM_INIT = 1000; Date.now() - dt;
 
 			    camLookAt(
-					-40,
-					30.0, //. + 50.0*sin(float(TIME_FROM_INIT)/200.),
+					30,
+					45.0, //. + 50.0*sin(float(TIME_FROM_INIT)/200.),
 					400
 					//1050.0 + 150.0 * Math.sin(TIME_FROM_INIT / 200.0)
 					);
@@ -107,17 +109,32 @@ var raytrace =  (function(){
 			    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
 			    gl.uniform1i(program.timeFromInit, TIME_FROM_INIT);
 			    
-			   var matA = mat4.rotate(mat4.create(), mat4.create(), 0.04*TIME_FROM_INIT  * Math.PI/180, [1, 0, 0]); 
-			   var matB = mat4.rotate(mat4.create(), mat4.create(), 0.05*TIME_FROM_INIT  * Math.PI/180, [0, 1, 0]); 
-			//	var matA = mat4.create();
-				var matB = mat4.create();
-				mat4.rotate(matB, matB, 0.05*TIME_FROM_INIT  * Math.PI/180, [0, 1, 0]);
-				matB = mat4.translate(matB,matB, [100 * Math.sin(0.005*TIME_FROM_INIT),0,0]);
-				
+				var matA = mat4.create();
 			
-			    gl.uniformMatrix4fv(ulocMatiA, false, mat4.invert(mat4.create(), matA));
-			    gl.uniformMatrix4fv(ulocMatiB, false, mat4.invert(mat4.create(), matB));
-		
+			function translate (mat4, vec3){
+				mat4[3] += vec3[0];
+				mat4[7] += vec3[1];
+				mat4[11] += vec3[2];
+				return mat4;
+			}
+				
+			    matA = mat4.rotate(matA, matA, 0.04*TIME_FROM_INIT  * Math.PI/180, [1, 0, 0]); 
+			 //   matA = mat4.translate(matA, matA, [10050,50,50]);
+				
+				//var matB = mat4.rotate(mat4.create(), mat4.create(), 0.05*TIME_FROM_INIT  * Math.PI/180, [0, 1, 0]); 
+				var matB = mat4.create();
+		  		
+				//matB = mat4.translate(mat4.create(), matB, [0,0,100*Math.sin(0.1*TIME_FROM_INIT * Math.PI/180 )]);
+				//matB = mat4.translate(mat4.create(), matB, [0,0,100]);
+				//matB = mat4.rotate(mat4.create(), matB, 0.04*TIME_FROM_INIT  * Math.PI/180, [0,1, 0]);
+				
+				gl.uniformMatrix4fv(ulocMatiA, false, mat4.invert(mat4.create(),  matA));
+			    gl.uniformMatrix4fv(ulocMatiB, false, mat4.invert(mat4.create(),  matB));
+			
+
+				gl.uniformMatrix4fv(ulocMatA, false, matA);
+			    gl.uniformMatrix4fv(ulocMatB, false, matB);
+			
 			   
 		
 			   gl.vertexAttribPointer(program.vertexPosAttrib, vertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);

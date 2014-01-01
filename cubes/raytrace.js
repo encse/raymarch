@@ -92,10 +92,11 @@ var raytrace =  (function(){
 
 		   (function animloop() {
 
-			    var TIME_FROM_INIT = Date.now() - dt;
+			    var TIME_FROM_INIT =  Date.now() - dt;
+			    //var TIME_FROM_INIT = 1000; Date.now() - dt;
 
 			    camLookAt(
-					-90,
+					-40,
 					30.0, //. + 50.0*sin(float(TIME_FROM_INIT)/200.),
 					400
 					//1050.0 + 150.0 * Math.sin(TIME_FROM_INIT / 200.0)
@@ -106,9 +107,9 @@ var raytrace =  (function(){
 			    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
 			    gl.uniform1i(program.timeFromInit, TIME_FROM_INIT);
 			    
-			 //  var matA = mat4.rotate(mat4.create(), mat4.create(), 0.04*TIME_FROM_INIT  * Math.PI/180, [1, 0, 0]); 
+			   var matA = mat4.rotate(mat4.create(), mat4.create(), 0.04*TIME_FROM_INIT  * Math.PI/180, [1, 0, 0]); 
 			 //  var matB = mat4.rotate(mat4.create(), mat4.create(), 0.05*TIME_FROM_INIT  * Math.PI/180, [0, 1, 0]); 
-				var matA = mat4.create();
+			//	var matA = mat4.create();
 				var matB = mat4.create();
 				mat4.rotate(matB, matB, 0.05*TIME_FROM_INIT  * Math.PI/180, [0, 1, 0]);
 				matB = mat4.translate(matB,matB, [100 * Math.sin(0.005*TIME_FROM_INIT),0,0]);

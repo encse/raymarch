@@ -18,84 +18,32 @@ uniform mat4 matiB;
 uniform int TIME_FROM_INIT;
 uniform Cam cam;
 
-
-
 vec3 vecLight = vec3(1,0.4,0);
 vec4 cintAmbient = vec4(0.6,0.6,0.6,1);
 vec4 cintBg = vec4(1,1,1,1);
 
+const int ITERLIM = 300;
 const float D = 1000.0;
-const float epsilon = 0.001;
-const float scale = 8.0;
-const int clight = 2;
-const int kmapUnion = 0;
-const int kmapIntersection = 1;
+const float epsilon = 0.01;
 
-float f_sphere(vec3 vecP, vec3 vecO, float r)
-{
-	return length(vecO-vecP)-r;
-}
-
-float f_plane(vec3 vecP, vec3 vecO, vec3 vecN)
-{
-	return dot(vecN, vecP-vecO);
-}
-
+//http://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
 float f_sbox(vec3 vecP, float size)
 {
 	vec3 d = abs(vecP)-vec3(size);
 	return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
 }
 
-float f_ubox(vec3 vecP, float size)
+float map(vec3 vecP, int iobst)
 {
-	return length(max(abs(vecP)-vec3(size),0.0));
-
+	float fs = iobst == 0 ? 
+		f_sbox(vec3(matiA * vec4(vecP,1)), 100.0) : 
+		f_sbox(vec3(matiB * vec4(vecP,1)), 100.0);
+	return fs;
 }
 
-
-
-
-float f_min(float fA, float fB, out int iobst)
-{
-	if(fA < fB)
-	{
-		iobst = 0;
-		return fA;
-	}
-	else
-	{
-		iobst = 1;
-		return fB;
-	}
-}
-
-//http://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
-float map(vec3 vecP, out int iobst)
-{
-	float fsA = f_sbox(vec3(matiA * vec4(vecP,1)), 100.0);
-	float fsB = f_sbox(vec3(matiB * vec4(vecP,1)), 100.0);
-	
-	float fuA = f_ubox(vec3(matiA * vec4(vecP,1)), 100.0);
-	float fuB = f_ubox(vec3(matiB * vec4(vecP,1)), 100.0);
-	
-	
-	
-	//iobst = 1;
-	//return max(fA, fB);
-	//iobst = 1;
-//	return fA;
-	iobst = 1;
-	//return fsB;
-	return max(fsA, fsB);
-	//return max(fsA, fsB);
-	return f_min(fsA,max(fsA, fsB), iobst);
-	
-}
-
-vec3 vecNorm(vec3 vecP)
+vec3 vecNorm(vec3 vecP, int iobst)
 {	
-	int iobst;
+	
 	return vec3(
 		map(vecP + vec3(epsilon,0,0), iobst) - map(vecP - vec3(epsilon,0,0), iobst),
 		map(vecP + vec3(0,epsilon,0), iobst) - map(vecP - vec3(0,epsilon,0), iobst),
@@ -117,83 +65,97 @@ vec4 cintBlend(vec4 cintA, vec4 cintB){
 	return vec4(0);
 }
 
-
-vec4 rm(vec3 vecV, vec3 vecD){
-
-	vec4 cint = vec4(0); 
-	float t = 0.0;
+void rm(vec3 vecV, vec3 vecD, int iobst, float tStart, out float t, out vec3 vecN) {
 	
-	for(int j=0;j<20;j++) {	
-
-		vec3 vecQ;
-		int iobst=-1;
-		for (int i=0; i<=1000; i++) {
-			if(t >= D)
-				break;
-			
-			vecQ = vecV + t * vecD;
-			float d = abs(map(vecQ, iobst));
-
-			if (d < epsilon)
-			{
-				
-				break;	
-			}
-			
-			t += d;
-			iobst = -1;
-		}
-		
-		if (iobst < 0)
-			return cint;
-		
-		vec3 vecN = vecNorm(vecQ);	
-		vec4 cintDiffuse;
-		if(iobst == 1)
-			cintDiffuse = vec4(0,0,1,0.1);
-		else if(iobst == 0)
-			cintDiffuse = vec4(1,0,0,1);
-		
-		cint += cintBlend(cint, cintShade(cintDiffuse, vecN));
-		
-		if(cint.a >= 1.0-epsilon)
+	t = tStart;
+	vec3 vecQ;
+	vecN = vec3(0);
+	for (int i=0; i<=ITERLIM; i++) {
+		if(i == ITERLIM)
+			t = D;
+		if(t >= D)
 			break;
-		
-		t+=epsilon;
-		for (int i=0; i<=1000; i++) {
-			if(t >= D)
-				break;
-			
-			vecQ = vecV + t * vecD;
-			float d = max(epsilon, abs(map(vecQ, iobst)));
-			t += d;
-			if (d > 2.0*epsilon)
-				break;	
+		vecQ = vecV + t * vecD;
+		float d = abs(map(vecQ, iobst));
+
+		if (d < epsilon) {
+			vecN = vecNorm(vecQ, iobst);
+			break;
 		}
 		
+		t += d;
 	}
-	
-	return cint;
 }
 
+
+void foo(vec3 vecV, vec3 vecD, int iobst, out float t1, out vec3 vecN1, out float t2, out vec3 vecN2){
+	
+	rm(vecV, vecD, iobst, 0.0, t1, vecN1);
+	
+	if(t1 >= D)	{
+		t2 = t1;
+		vecN2 = vec3(0);
+		return;
+	}
+	
+	t2 = t1+epsilon;
+	for (int i=0; i<=ITERLIM; i++) {
+		if(t2 >= D)
+			break;
+		
+		vec3 vecQ = vecV + t2 * vecD;
+		float d = max(epsilon, abs(map(vecQ, iobst)));
+		t2 += d;
+		if (d > 4.0*epsilon)
+			break;	
+	}
+	
+	rm(vecV, vecD, iobst, t2, t2, vecN2);
+	
+}
+
+vec4 cintAdd(vec4 cint, vec4 cintBase, vec3 vecN) {
+	return length(vecN) > 0.0 ? cintBlend(cint, cintShade(cintBase, vecN)) : cint;
+}
 
 vec4 cintGet(vec3 vecV, vec3 vecD){
 
-	return rm(vecV, vecD);
+	float t1A, t2A, t1B,t2B;
+	vec3 vecN1A, vecN2A, vecN1B, vecN2B;
+	
+	foo(vecV, vecD, 0, t1A, vecN1A, t2A, vecN2A);
+	foo(vecV, vecD, 1, t1B, vecN1B, t2B, vecN2B);
+	
+	vec4 cint = vec4(0);
+	vec4 cintBox = vec4(0,0,1,0.05);
+	vec4 cintIntersection = vec4(1,0,0,1);
+		
+	if(t1A <= t1B && t1B <= t2A && t2A < D)
+	{
+		cint = cintAdd(cint, cintBox, vecN1A);
+		cint = cintAdd(cint, cintIntersection, vecN1B);
+	}
+	else if(t1B <= t1A && t1A <= t2B && t2B < D)
+	{
+		cint = cintAdd(cint, cintBox, vecN1B);
+		cint = cintAdd(cint, cintIntersection, vecN1A);
+	}
+	else
+	{
+		cint = cintAdd(cint, cintBox, vecN1A);
+		cint = cintAdd(cint, cintBox, vecN2A);
+		cint = cintAdd(cint, cintBox, vecN1B);
+		cint = cintAdd(cint, cintBox, vecN2B);
+	}
+
+	return cint;
 }
 
 void main() {
-
-//	mat4 m = mat4(1);
-//	mat4 d = transpose(m);
 	float wScene = uCanvasSize.x;
 	float hScene = uCanvasSize.y;
 	
 	vec3 vectS = cam.vectP + cam.vectX * (gl_FragCoord.x-wScene/2.0) + cam.vectY * (gl_FragCoord.y-hScene /2.0);
- 
-    vec4 cint = cintGet(vectS, normalize(vectS - cam.vectO));
-	
+	vec4 cint = cintGet(vectS, normalize(vectS - cam.vectO));
 	gl_FragColor =  cintBlend(cint, cintBg);
-	//gl_FragColor =  vec4(-1.0+gl_FragCoord.x /wScene, -1.0+gl_FragCoord.x/hScene,-1.0+gl_FragCoord.x/hScene, 1);
-   
 }

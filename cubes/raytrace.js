@@ -108,7 +108,7 @@ var raytrace =  (function(){
 			    gl.uniform1i(program.timeFromInit, TIME_FROM_INIT);
 			    
 			   var matA = mat4.rotate(mat4.create(), mat4.create(), 0.04*TIME_FROM_INIT  * Math.PI/180, [1, 0, 0]); 
-			 //  var matB = mat4.rotate(mat4.create(), mat4.create(), 0.05*TIME_FROM_INIT  * Math.PI/180, [0, 1, 0]); 
+			   var matB = mat4.rotate(mat4.create(), mat4.create(), 0.05*TIME_FROM_INIT  * Math.PI/180, [0, 1, 0]); 
 			//	var matA = mat4.create();
 				var matB = mat4.create();
 				mat4.rotate(matB, matB, 0.05*TIME_FROM_INIT  * Math.PI/180, [0, 1, 0]);

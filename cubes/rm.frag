@@ -18,6 +18,7 @@ const vec3 vecLight = vec3(0,1,1);
 const vec4 cintAmbient = vec4(0.8,0.8,0.8,1);
 const vec4 cintBg = vec4(1,1,1,1);
 const vec4 cintBox = vec4(0.0,0.0,0.9,0.1);
+//const vec4 cintBox = vec4(0);
 const vec4 cintIntersection = vec4(0.9,0.7,0,1);
 
 const float sizeBox = 300.0;
@@ -79,7 +80,7 @@ void box_intersections(vec3 vecV, vec3 vecD, mat4 mat, mat4 mati, out float t1, 
 
 	vecV = vec3(mati * vec4(vecV, 1));
 	vecD = vec3(mati * vec4(vecD, 0));
-	vecV += 0.5*vec3(sizeBox,sizeBox,sizeBox);
+//	vecV += 0.5*vec3(sizeBox,sizeBox,sizeBox);
 
 	t1 = T_LIM;
 	t2 = -T_LIM;

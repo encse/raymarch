@@ -109,37 +109,38 @@ var raytrace =  (function(){
 			    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
 			    gl.uniform1i(program.timeFromInit, TIME_FROM_INIT);
 			    
+				
+				function translate (mat4, vec3){
+					mat4[3] += vec3[0];
+					mat4[7] += vec3[1];
+					mat4[11] += vec3[2];
+					return mat4;
+				}
+				
+				function rotate (mat, vecAxis, phi, vecOrigin){
+				
+					if(vecOrigin)
+						translate(mat, [-vecOrigin[0], -vecOrigin[1], -vecOrigin[2]]);	
+					mat4.rotate(mat, mat, phi, vecAxis);
+					if(vecOrigin)
+						translate(mat, vecOrigin);	
+					return mat;
+				}
+				
 				var matA = mat4.create();
-			
-			function translate (mat4, vec3){
-				mat4[3] += vec3[0];
-				mat4[7] += vec3[1];
-				mat4[11] += vec3[2];
-				return mat4;
-			}
-				
-			    matA = mat4.rotate(matA, matA, 0.04*TIME_FROM_INIT  * Math.PI/180, [1, 0, 0]); 
-			 //   matA = mat4.translate(matA, matA, [10050,50,50]);
-				
-				//var matB = mat4.rotate(mat4.create(), mat4.create(), 0.05*TIME_FROM_INIT  * Math.PI/180, [0, 1, 0]); 
 				var matB = mat4.create();
-		  		
-				//matB = mat4.translate(mat4.create(), matB, [0,0,100*Math.sin(0.1*TIME_FROM_INIT * Math.PI/180 )]);
-				//matB = mat4.translate(mat4.create(), matB, [0,0,100]);
-				//matB = mat4.rotate(mat4.create(), matB, 0.04*TIME_FROM_INIT  * Math.PI/180, [0,1, 0]);
-				
-				gl.uniformMatrix4fv(ulocMatiA, false, mat4.invert(mat4.create(),  matA));
-			    gl.uniformMatrix4fv(ulocMatiB, false, mat4.invert(mat4.create(),  matB));
+		  	
+				rotate(matB, [1,1,0], 0.04*TIME_FROM_INIT  * Math.PI/180, [150,150,150]);
+				translate(matB, [0,0,100*Math.sin(0.1*TIME_FROM_INIT * Math.PI/180 )]);
 			
-
-				gl.uniformMatrix4fv(ulocMatA, false, matA);
-			    gl.uniformMatrix4fv(ulocMatB, false, matB);
-			
-			   
+				gl.uniformMatrix4fv(ulocMatiA, false, mat4.invert(mat4.create(),  mat4.transpose(mat4.create(), matA)));
+			    gl.uniformMatrix4fv(ulocMatiB, false, mat4.invert(mat4.create(),  mat4.transpose(mat4.create(), matB)));
+				gl.uniformMatrix4fv(ulocMatA, false, mat4.transpose(mat4.create(), matA));
+			    gl.uniformMatrix4fv(ulocMatB, false, mat4.transpose(mat4.create(), matB));
 		
-			   gl.vertexAttribPointer(program.vertexPosAttrib, vertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
-			   gl.drawArrays(gl.TRIANGLE_FAN, 0, vertexPosBuffer.numItems);
-			   requestAnimationFrame(animloop);
+			    gl.vertexAttribPointer(program.vertexPosAttrib, vertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			    gl.drawArrays(gl.TRIANGLE_FAN, 0, vertexPosBuffer.numItems);
+			    requestAnimationFrame(animloop);
 			 
 		   })();
 		});

@@ -127,12 +127,16 @@ var raytrace =  (function(){
 					return mat;
 				}
 				
+				var sizeBox = 300.0;
 				var matA = mat4.create();
+				mat4.scale(matA, matA, [sizeBox, sizeBox, sizeBox]);
+				
 				var matB = mat4.create();
 		  	
+				mat4.scale(matB, matB, [sizeBox, sizeBox, sizeBox]);
+				
 				rotate(matB, [1,1,0], 0.04*TIME_FROM_INIT  * Math.PI/180, [150,150,150]);
 				translate(matB, [0,0,100*Math.sin(0.1*TIME_FROM_INIT * Math.PI/180 )]);
-			
 				gl.uniformMatrix4fv(ulocMatiA, false, mat4.invert(mat4.create(),  mat4.transpose(mat4.create(), matA)));
 			    gl.uniformMatrix4fv(ulocMatiB, false, mat4.invert(mat4.create(),  mat4.transpose(mat4.create(), matB)));
 				gl.uniformMatrix4fv(ulocMatA, false, mat4.transpose(mat4.create(), matA));

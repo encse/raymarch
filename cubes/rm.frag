@@ -21,7 +21,6 @@ const vec4 cintBox = vec4(0.0,0.0,0.9,0.1);
 //const vec4 cintBox = vec4(0);
 const vec4 cintIntersection = vec4(0.9,0.7,0,1);
 
-const float sizeBox = 300.0;
 const float epsilon = 0.00001;
 const float T_LIM = 100000.0;
 
@@ -66,7 +65,7 @@ bool line_box_side_intersect(vec3 vecO, vec3 vecN, vec3 vecV, vec3 vecD, out flo
 	
 	vec3 vecQ = vecV + t*vecD;
 	
-	if(min(vecQ.x, min(vecQ.y, vecQ.z)) < -6.0*epsilon || max(vecQ.x, max(vecQ.y, vecQ.z)) > sizeBox + 6.0*epsilon)
+	if(min(vecQ.x, min(vecQ.y, vecQ.z)) < -6.0*epsilon || max(vecQ.x, max(vecQ.y, vecQ.z)) > 1.0 + 6.0*epsilon)
 		return false;
 
 	return true;
@@ -80,7 +79,6 @@ void box_intersections(vec3 vecV, vec3 vecD, mat4 mat, mat4 mati, out float t1, 
 
 	vecV = vec3(mati * vec4(vecV, 1));
 	vecD = vec3(mati * vec4(vecD, 0));
-//	vecV += 0.5*vec3(sizeBox,sizeBox,sizeBox);
 
 	t1 = T_LIM;
 	t2 = -T_LIM;
@@ -88,7 +86,7 @@ void box_intersections(vec3 vecV, vec3 vecD, mat4 mat, mat4 mati, out float t1, 
 	
 	vec3 rgvecCorner[6]; 
 	rgvecCorner[0] = rgvecCorner[1] = rgvecCorner[2] = vec3(0);
-	rgvecCorner[3] = rgvecCorner[4] = rgvecCorner[5] = vec3(sizeBox);
+	rgvecCorner[3] = rgvecCorner[4] = rgvecCorner[5] = vec3(1.0);
 
 	vec3 rgvecN[6];
 	rgvecN[0] = vec3(-1,0,0);

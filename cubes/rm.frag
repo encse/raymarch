@@ -146,7 +146,6 @@ vec4 cintGet(vec3 vecV, vec3 vecD){
 void main() {
 	
 	vec3 vectS = vec3(matCam *  vec4(gl_FragCoord.x - uCanvasSize.x / 2.0, gl_FragCoord.y - uCanvasSize.y / 2.0, 1, 1));
-	//vec3 vectS = vec3(matCam *  vec4(gl_FragCoord.x , gl_FragCoord.y, 1, 1));
 	vec3 vectO = vec3(matCam *  vec4(0,0,0, 1));
 	vec4 cint = cintGet(vectS, normalize(vectS - vectO));
 	

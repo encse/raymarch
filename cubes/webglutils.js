@@ -269,8 +269,8 @@ RaytraceUtils = function(){
 		return function(){
 			gl.clear(gl.COLOR_BUFFER_BIT);
 			gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
-			dgSetParams();
 			gl.vertexAttribPointer(program.vertexPosAttrib, vertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			dgSetParams();
 			gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexPosBuffer.numItems);
 		}
 	}

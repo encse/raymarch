@@ -141,9 +141,98 @@ var create3DContext = function(canvas, opt_attribs) {
   return context;
 }
 
+var createShader = function createShader(gl, str, type) {
+	var shader = gl.createShader(type);
+	gl.shaderSource(shader, str);
+	gl.compileShader(shader);
+	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+		throw gl.getShaderInfoLog(shader);
+	}
+	return shader;
+}
+
+
+var linkProgram = function(gl, program) {
+	var vshader = createShader(gl, program.vshaderSource, gl.VERTEX_SHADER);
+	var fshader = createShader(gl, program.fshaderSource, gl.FRAGMENT_SHADER);
+	gl.attachShader(program, vshader);
+	gl.attachShader(program, fshader);
+	gl.linkProgram(program);
+	if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+		throw gl.getProgramInfoLog(program);
+	}
+}
+
+var loadFile =function(file, callback, noCache, isJson) {
+	var request = new XMLHttpRequest();
+	request.onreadystatechange = function() {
+		if (request.readyState == 1) {
+			if (isJson) {
+				request.overrideMimeType('application/json');
+			}
+			request.send();
+		} else if (request.readyState == 4) {
+			if (request.status == 200) {
+				callback(request.responseText);
+			} else if (request.status == 404) {
+				throw 'File "' + file + '" does not exist.';
+			} else {
+				throw 'XHR error ' + request.status + '.';
+			}
+		}
+	};
+	var url = file;
+	if (noCache) {
+		url += '?' + (new Date()).getTime();
+	}
+	request.open('GET', url, true);
+}
+
+var loadProgram = function(gl, vs, fs, callback) {
+	var program = gl.createProgram();
+	function vshaderLoaded(str) {
+		program.vshaderSource = str;
+		if (program.fshaderSource) {
+			linkProgram(gl, program);
+			callback(program);
+		}
+	}
+	function fshaderLoaded(str) {
+		program.fshaderSource = str;
+		if (program.vshaderSource) {
+			linkProgram(gl, program);
+			callback(program);
+		}
+	}
+	loadFile(vs, vshaderLoaded, true);
+	loadFile(fs, fshaderLoaded, true);
+	return program;
+}
+
+var screenQuad = function(gl) {
+	var vertexPosBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+	var vertices = [-1, -1, 1, -1, -1, 1, 1, 1];
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+	vertexPosBuffer.itemSize = 2;
+	vertexPosBuffer.numItems = 4;
+
+	/*
+	 2___3
+	 |\  |
+	 | \ |
+	 |__\|
+	 0   1
+	*/
+	
+	return vertexPosBuffer;
+}
+
 return {
   create3DContext: create3DContext,
-  setupWebGL: setupWebGL
+  setupWebGL: setupWebGL,
+  loadProgram: loadProgram,
+  screenQuad: screenQuad
 };
 }();
 

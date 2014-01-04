@@ -173,17 +173,19 @@ var mat4 = (function(){
 		var mat4Result = mat4.clone(mat);
 		
 		mat4Result[0] *= x;
-		mat4Result[1] *= x;
-		mat4Result[2] *= x;
-		mat4Result[3] *= x;
-		mat4Result[4] *= y;
+		mat4Result[4] *= x;
+		mat4Result[8] *= x;
+		mat4Result[12] *= x;
+		
+		mat4Result[1] *= y;
 		mat4Result[5] *= y;
-		mat4Result[6] *= y;
-		mat4Result[7] *= y;
-		mat4Result[8] *= z;
-		mat4Result[9] *= z;
+		mat4Result[9] *= y;
+		mat4Result[13] *= y;
+		
+		mat4Result[2] *= z;
+		mat4Result[6] *= z;
 		mat4Result[10] *= z;
-		mat4Result[11] *= z;
+		mat4Result[14] *= z;
 	
 		return mat4Result;
 	}
@@ -241,13 +243,13 @@ var mat4 = (function(){
 		var betaRad = beta * 3.141592654 / 180.0;
 		
 		var vectP = [Math.cos(alphaRad) * Math.cos(betaRad), Math.sin(betaRad), Math.sin(alphaRad)* Math.cos(betaRad)];
-		var vectZ = vec3.mul(100000, vectP);
+		var vectO = vec3.mul(100000, vectP);
 		
-		var u = vec3.cross(vectZ, [0, 1, 0]);
+		var u = vec3.cross(vectO, [0, 1, 0]);
 		
 		if (vec3.length(u) == 0.0)
-			 u = vec3.cross(vectZ, [1, 0, 0]);
-		var v = vec3.cross(u, vectZ);
+			 u = vec3.cross(vectO, [1, 0, 0]);
+		var v = vec3.cross(u, vectO);
 		
 		var vectX = vec3.normalize(u);
 		var vectY = vec3.normalize(v);
@@ -261,13 +263,13 @@ var mat4 = (function(){
 		matCam[5] = vectY[1];
 		matCam[6] = vectY[2];
 		
-		matCam[8] = vectZ[0];
-		matCam[9] = vectZ[1];
-		matCam[10] = vectZ[2];
+		matCam[8] = vectP[0] -  vectO[0];
+		matCam[9] = vectP[1] -  vectO[1];
+		matCam[10] = vectP[2] -  vectO[2];
 		
-		matCam[12] = vectP[0];
-		matCam[13] = vectP[1];
-		matCam[14] = vectP[2];
+		matCam[12] = vectO[0] ;
+		matCam[13] = vectO[1] ;
+		matCam[14] = vectO[2] ;
 	
 		return matCam;
 	}

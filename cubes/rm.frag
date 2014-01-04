@@ -13,8 +13,9 @@ uniform vec2 uCanvasSize;
 uniform mat4 matA, matiA;
 uniform mat4 matB, matiB;
 uniform Cam cam;
+uniform mat4 matCam;
 
-const vec3 vecLight = vec3(0,1,1);
+const vec3 vecLight = vec3(0,1,0.6);
 const vec4 cintAmbient = vec4(0.8,0.8,0.8,1);
 const vec4 cintBg = vec4(1,1,1,1);
 const vec4 cintBox = vec4(0.0,0.0,0.9,0.1);
@@ -153,7 +154,11 @@ vec4 cintGet(vec3 vecV, vec3 vecD){
 
 void main() {
 	
-	vec3 vectS = cam.vectP + cam.vectX * (gl_FragCoord.x - uCanvasSize.x / 2.0) + cam.vectY * (gl_FragCoord.y - uCanvasSize.y / 2.0);
+	// vec3 vectS = cam.vectP + cam.vectX * (gl_FragCoord.x - uCanvasSize.x / 2.0) + cam.vectY * (gl_FragCoord.y - uCanvasSize.y / 2.0);
+	// vec4 cint = cintGet(vectS, normalize(vectS - cam.vectO));
+	
+	vec3 vectS = vec3(matCam *  vec4(gl_FragCoord.x - uCanvasSize.x / 2.0, gl_FragCoord.y - uCanvasSize.y / 2.0, 0, 1));
+	vec3 vectO = vec3(matCam *  vec4(0,0,1, 1));
 	vec4 cint = cintGet(vectS, normalize(vectS - cam.vectO));
 	
 	gl_FragColor = cintBlend(cint, cintBg);

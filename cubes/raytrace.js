@@ -68,6 +68,7 @@ var raytrace =  (function(){
 			   var ulocCamVectP = gl.getUniformLocation(program, 'cam.vectP');
 			   var ulocCamVectX = gl.getUniformLocation(program, 'cam.vectX');
 			   var ulocCamVectY = gl.getUniformLocation(program, 'cam.vectY');
+			   var ulocMatCam = gl.getUniformLocation(program, 'matCam');
 
 			   return function (alpha, beta, d) {
 				   var alphaRad = alpha * 3.141592654 / 180.0;
@@ -89,6 +90,26 @@ var raytrace =  (function(){
 				   gl.uniform3f(ulocCamVectO, cam.vectO.x, cam.vectO.y, cam.vectO.z);
 				   gl.uniform3f(ulocCamVectX, cam.vectX.x, cam.vectX.y, cam.vectX.z);
 				   gl.uniform3f(ulocCamVectY, cam.vectY.x, cam.vectY.y, cam.vectY.z);
+				   
+				   var matCam = mat4.create();
+				   matCam[0] = cam.vectX.x;
+				   matCam[1] = cam.vectX.y;
+				   matCam[2] = cam.vectX.z;
+				   
+				   matCam[4] = cam.vectY.x;
+				   matCam[5] = cam.vectY.y;
+				   matCam[6] = cam.vectY.z;
+				   
+				   var vectOx = cross(cam.vectX, cam.vectY);
+				   matCam[8] = 100001.0 * vectOx.x;
+				   matCam[9] = 100001.0 * vectOx.y;
+				   matCam[10] = 100001.0 * vectOx.z;
+				  
+				   matCam[8] = cam.vectP.x;
+				   matCam[9] = cam.vectP.y;
+				   matCam[10] = cam.vectP.z;
+				   
+ 				   gl.uniformMatrix4fv(ulocMatCam, false, matCam);
 			   }
 		   })();
 
@@ -135,7 +156,10 @@ var raytrace =  (function(){
 		  	
 				mat4.scale(matB, matB, [sizeBox, sizeBox, sizeBox]);
 				
-				rotate(matB, [1,1,0], 0.04*TIME_FROM_INIT  * Math.PI/180, [150,150,150]);
+			
+								
+				
+			//	rotate(matB, [1,1,0], 0.04*TIME_FROM_INIT  * Math.PI/180, [150,150,150]);
 				translate(matB, [0,0,100*Math.sin(0.1*TIME_FROM_INIT * Math.PI/180 )]);
 				gl.uniformMatrix4fv(ulocMatiA, false, mat4.invert(mat4.create(),  mat4.transpose(mat4.create(), matA)));
 			    gl.uniformMatrix4fv(ulocMatiB, false, mat4.invert(mat4.create(),  mat4.transpose(mat4.create(), matB)));

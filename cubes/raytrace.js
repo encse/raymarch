@@ -64,50 +64,43 @@ var raytrace =  (function(){
 			
 		
 			var camLookAt = (function () {
-			   var ulocCamVectO = gl.getUniformLocation(program, 'cam.vectO');
-			   var ulocCamVectP = gl.getUniformLocation(program, 'cam.vectP');
-			   var ulocCamVectX = gl.getUniformLocation(program, 'cam.vectX');
-			   var ulocCamVectY = gl.getUniformLocation(program, 'cam.vectY');
+			
 			   var ulocMatCam = gl.getUniformLocation(program, 'matCam');
 
 			   return function (alpha, beta, d) {
 				   var alphaRad = alpha * 3.141592654 / 180.0;
 				   var betaRad = beta * 3.141592654 / 180.0;
 
-				   var cam = {};
-				   cam.vectP = vec3(d * Math.cos(alphaRad) * Math.cos(betaRad), d * Math.sin(betaRad), d * Math.sin(alphaRad)* Math.cos(betaRad));
-				   cam.vectO = mul(100001.0, normalize(cam.vectP));
-				   var u = cross(vec3(0, 1, 0), sub(cam.vectP, cam.vectO));
+				 
+				   var vectP = vec3(d * Math.cos(alphaRad) * Math.cos(betaRad), d * Math.sin(betaRad), d * Math.sin(alphaRad)* Math.cos(betaRad));
+				   var vectZ = mul(100000, normalize(vectP));
+				
+				   var u = cross(vectZ, vec3(0, 1, 0));
 
 				   if (length(u) == 0.0)
-					   u = cross(vec3(1, 0, 0), sub(cam.vectP, cam.vectO));
-				   var v = cross(sub(cam.vectP, cam.vectO), u);
+					   u = cross(vectZ, vec3(1, 0, 0));
+				   var v = cross(u, vectZ);
 
-				   cam.vectX = normalize(u);
-				   cam.vectY = normalize(v);
-
-				   gl.uniform3f(ulocCamVectP, cam.vectP.x, cam.vectP.y, cam.vectP.z);
-				   gl.uniform3f(ulocCamVectO, cam.vectO.x, cam.vectO.y, cam.vectO.z);
-				   gl.uniform3f(ulocCamVectX, cam.vectX.x, cam.vectX.y, cam.vectX.z);
-				   gl.uniform3f(ulocCamVectY, cam.vectY.x, cam.vectY.y, cam.vectY.z);
-				   
-				   var matCam = mat4.create();
-				   matCam[0] = cam.vectX.x;
-				   matCam[1] = cam.vectX.y;
-				   matCam[2] = cam.vectX.z;
-				   
-				   matCam[4] = cam.vectY.x;
-				   matCam[5] = cam.vectY.y;
-				   matCam[6] = cam.vectY.z;
-				   
-				   var vectOx = cross(cam.vectX, cam.vectY);
-				   matCam[8] = 100001.0 * vectOx.x;
-				   matCam[9] = 100001.0 * vectOx.y;
-				   matCam[10] = 100001.0 * vectOx.z;
+				   var vectX = normalize(u);
+				   var vectY = normalize(v);
 				  
-				   matCam[8] = cam.vectP.x;
-				   matCam[9] = cam.vectP.y;
-				   matCam[10] = cam.vectP.z;
+
+ 				   var matCam = mat4.create();
+				   matCam[0] = vectX.x;
+				   matCam[1] = vectX.y;
+				   matCam[2] = vectX.z;
+				   
+				   matCam[4] = vectY.x;
+				   matCam[5] = vectY.y;
+				   matCam[6] = vectY.z;
+				   
+				   matCam[8] = vectZ.x;
+				   matCam[9] = vectZ.y;
+				   matCam[10] = vectZ.z;
+				  
+				   matCam[12] = vectP.x;
+				   matCam[13] = vectP.y;
+				   matCam[14] = vectP.z;
 				   
  				   gl.uniformMatrix4fv(ulocMatCam, false, matCam);
 			   }

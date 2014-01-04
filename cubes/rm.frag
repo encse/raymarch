@@ -2,17 +2,11 @@
 precision highp float;
 #endif
 
-struct Cam{
-	vec3 vectO;
-	vec3 vectP;
-	vec3 vectX;
-	vec3 vectY;
-};
 
 uniform vec2 uCanvasSize;
 uniform mat4 matA, matiA;
 uniform mat4 matB, matiB;
-uniform Cam cam;
+
 uniform mat4 matCam;
 
 const vec3 vecLight = vec3(0,1,0.6);
@@ -154,12 +148,10 @@ vec4 cintGet(vec3 vecV, vec3 vecD){
 
 void main() {
 	
-	// vec3 vectS = cam.vectP + cam.vectX * (gl_FragCoord.x - uCanvasSize.x / 2.0) + cam.vectY * (gl_FragCoord.y - uCanvasSize.y / 2.0);
-	// vec4 cint = cintGet(vectS, normalize(vectS - cam.vectO));
 	
 	vec3 vectS = vec3(matCam *  vec4(gl_FragCoord.x - uCanvasSize.x / 2.0, gl_FragCoord.y - uCanvasSize.y / 2.0, 0, 1));
 	vec3 vectO = vec3(matCam *  vec4(0,0,1, 1));
-	vec4 cint = cintGet(vectS, normalize(vectS - cam.vectO));
+	vec4 cint = cintGet(vectS, normalize(vectS - vectO));
 	
 	gl_FragColor = cintBlend(cint, cintBg);
 }

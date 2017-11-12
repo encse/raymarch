@@ -20,16 +20,19 @@ var cubes =  (function(){
 			var matA = mat4.create();
 			matA = mat4.translate(matA, [-0.5,-0.5,-0.5]);
 			matA = mat4.scale(matA, [sizeBox, sizeBox, sizeBox]);
+			matA = mat4.rotate(matA, 
+				[1, Math.cos(0.003 * TIME_FROM_INIT ), Math.cos(0.003 * TIME_FROM_INIT )], 
+				Math.sin(0.001 * TIME_FROM_INIT ));
 			
-			
-			sizeBox/=2;
+            sizeBox *= (1 + Math.sin(0.001 * TIME_FROM_INIT) / 2);
+            
 			var matB = mat4.create();
 			matB = mat4.translate(matB, [-0.5,-0.5,-0.5]);
 
 			matB = mat4.scale(matB, [sizeBox, sizeBox, sizeBox]);
 			matB = mat4.rotate(matB, 
 				[1, Math.sin(0.003 * TIME_FROM_INIT ), Math.sin(0.003 * TIME_FROM_INIT )], 
-				0.0001 * TIME_FROM_INIT);
+				Math.sin(0.001 * TIME_FROM_INIT ));
 			matB = mat4.translate(matB, [0,0,sizeBox*Math.sin(0.1*TIME_FROM_INIT * Math.PI/180 )]);
 
 			gl.uniform4fv(ulocCintBox, [0.0,0.0,1, 0.1 * (0.5 + 0.5 * Math.cos(0.0005*TIME_FROM_INIT))]);
@@ -39,7 +42,7 @@ var cubes =  (function(){
 			gl.uniformMatrix4fv(ulocMatA, false, matA);
 			gl.uniformMatrix4fv(ulocMatB, false, matB);
 			gl.uniformMatrix4fv(ulocMatCam, false, mat4.camLookAt(
-				0.01 * TIME_FROM_INIT,
+				0.01, // * TIME_FROM_INIT,
 				35.0 // *Math.sin(TIME_FROM_INIT / 1000.0) //. + 50.0*sin(float(TIME_FROM_INIT)/200.),
 			));
 			

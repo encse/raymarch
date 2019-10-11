@@ -203,7 +203,7 @@ void main() {
 	float wScene = uCanvasSize.x;
 	float hScene = uCanvasSize.y;
 	
-	vec3 vectS = cam.vectP + cam.vectX * (gl_FragCoord.x-wScene/2.0) + cam.vectY * (gl_FragCoord.y-hScene /2.0);
+	vec3 vectS = cam.vectP + cam.vectX * (gl_FragCoord.x-320.0) + cam.vectY * (gl_FragCoord.y-200.0);
  
     gl_FragColor =  cintGet(vectS, normalize(vectS - cam.vectO));
 	//gl_FragColor =  vec4(-1.0+gl_FragCoord.x /wScene, -1.0+gl_FragCoord.x/hScene,-1.0+gl_FragCoord.x/hScene, 1);
